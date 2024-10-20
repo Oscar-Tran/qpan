@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('bg.jpg') no-repeat;
+            background-size: cover;
+            color: black;
+            padding: 1rem;
+            font-size: 13px; /* Tăng kích thước chữ cơ bản */
+        }
+
+        .teams-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.3); /* Đậm hơn */
+            padding: 1rem;
+            display: flex;
+            justify-content: space-around;
+            gap: 1rem;
+        }
+
+        .team-card {
+            background: rgba(0, 0, 0, 0.5); /* Đậm hơn */
+            padding: 1.2rem; /* Padding lớn hơn */
+            border-radius: 0.5rem;
+            min-width: 180px; /* Rộng hơn */
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 1px solid rgba(0, 0, 0, 0.2); /* Đậm hơn */
+        }
+
+        .team-card:hover {
+            transform: scale(1.05);
+            background: rgba(0, 0, 0, 0.10); /* Đậm hơn khi hover */
+        }
+
+        .team-name {
+            font-weight: 700; /* Đậm hơn */
+            margin-bottom: 0.5rem;
+            color: black;
+            font-size: 1rem; /* Lớn hơn */
+        }
+
+        .team-score {
+            font-size: 1.5rem; /* Lớn hơn */
+            font-weight: 700; /* Đậm hơn */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+        }
+
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            text-align: center;
+        }
+
+        .start-title {
+            font-size: 4rem; /* Lớn hơn */
+            font-weight: 700; /* Đậm hơn */
+            margin-bottom: 2rem;
+            color: black;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .start-button {
+            padding: 1.5rem 4rem; /* Lớn hơn */
+            font-size: 1.8rem; /* Lớn hơn */
+            font-weight: 600; /* Đậm hơn */
+            background: #4caf50;
+            border: none;
+            border-radius: 2rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .start-button:hover {
+            transform: scale(1.05);
+            background: #45a049;
+        }
+
+        .question-container {
+            display: none;
+            margin-top: 130px; /* Cao hơn do header lớn hơn */
+            max-width: 800px; /* Rộng hơn */
+            margin-left: auto;
+            margin-right: auto;
+            background: rgba(0, 0, 0, 0.2); /* Đậm hơn */
+            padding: 2.5rem; /* Padding lớn hơn */
+            border-radius: 1rem;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.2); /* Đậm hơn */
+        }
+
+        .question-container.show {
+            display: block;
+        }
+
+        .question-number {
+            font-size: 2rem; /* Lớn hơn */
+            font-weight: 700; /* Đậm hơn */
+            margin-bottom: 1.5rem;
+            color: black;
+        }
+
+        .question-text {
+            font-size: 1.5rem; /* Lớn hơn */
+            font-weight: 500; /* Đậm hơn */
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            color: black;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem; /* Gap lớn hơn */
+        }
+
+        .answer-option {
+            background: rgba(0, 0, 0, 0.3); /* Đậm hơn */
+            padding: 1.2rem; /* Padding lớn hơn */
+            border-radius: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: black;
+            border: 1px solid rgba(0, 0, 0, 0.2); /* Đậm hơn */
+            font-size: 1.4rem; /* Lớn hơn */
+            font-weight: 700; /* Đậm hơn */
+        }
+
+        .answer-option:hover {
+            background: rgba(0, 0, 0, 0.12); /* Đậm hơn */
+        }
+
+        .answer-option.selected {
+            background: rgba(76, 175, 80, 0.3); /* Đậm hơn */
+            border: 2px solid #4caf50;
+        }
+
+        .answer-option.correct {
+            background: rgba(76, 175, 80, 0.3); /* Đậm hơn */
+            border: 2px solid #4caf50;
+        }
+
+        .help-text {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            opacity: 0.7;
+            font-size: 1.1rem; /* Lớn hơn */
+            font-weight: 500; /* Đậm hơn */
+            color: black;
+        }
+
+        .choose-team-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.98); /* Đậm hơn */
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .choose-team-container.show {
+            display: flex;
+        }
+
+        .correct-mark {
+            font-size: 6rem; /* Lớn hơn */
+            color: #4caf50;
+            margin-bottom: 2rem;
+        }
+
+        .team-choices-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem; /* Gap lớn hơn */
+            margin-bottom: 1.5rem;
+        }
+
+        .team-choice {
+            background: rgba(0, 0, 0, 0.08); /* Đậm hơn */
+            padding: 2rem 3rem; /* Padding lớn hơn */
+            border-radius: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.6rem; /* Lớn hơn */
+            font-weight: 600; /* Đậm hơn */
+            color: black;
+            border: 1px solid rgba(0, 0, 0, 0.2); /* Đậm hơn */
+        }
+
+        .team-choice:hover {
+            background: rgba(0, 0, 0, 0.12); /* Đậm hơn */
+            transform: scale(1.05);
+        }
+
+        .skip-button {
+            margin-top: 1.5rem;
+            padding: 1rem 2rem; /* Lớn hơn */
+            background: #ff5252;
+            border: none;
+            color: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem; /* Lớn hơn */
+            font-weight: 600; /* Đậm hơn */
+            opacity: 0.8;
+        }
+
+        .skip-button:hover {
+            opacity: 1;
+        }
+
+        .finish-screen {
+            text-align: center;
+            padding: 2.5rem;
+        }
+
+        .winner {
+            font-size: 3rem; /* Lớn hơn */
+            font-weight: 800; /* Đậm hơn */
+            margin-bottom: 1.5rem;
+            color: #4caf50;
+        }
+
+        .draw {
+            font-size: 3rem; /* Lớn hơn */
+            font-weight: 800; /* Đậm hơn */
+            margin-bottom: 1.5rem;
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="teams-container" id="teams"></div>
+    
+    <div class="start-screen" id="startScreen">
+        <h1 class="start-title">Quiz Game</h1>
+        <button class="start-button" onclick="startGame()">Bắt đầu</button>
+    </div>
+
+    <div class="question-container" id="question"></div>
+    <div class="help-text">Nhấp chuột để tiếp tục</div>
+
+    <div class="choose-team-container" id="chooseTeamContainer">
+        <div class="correct-mark">✓</div>
+        <div class="team-choices-container">
+            <div class="team-choice" onclick="chooseTeam(0)">Nhóm 1</div>
+            <div class="team-choice" onclick="chooseTeam(1)">Nhóm 2</div>
+            <div class="team-choice" onclick="chooseTeam(2)">Nhóm 3</div>
+            <div class="team-choice" onclick="chooseTeam(3)">Nhóm 4</div>
+        </div>
+        <button class="skip-button" onclick="skipQuestion()">Bỏ qua</button>
+    </div>
+
+    <script>
+        const questions = [
+	            {
+	                type: 'multiple',
+	                question: 'Điền cụm từ thích hợp vào chỗ trống (…) trong khái niệm sau đây: "…… là sự biến đổi tính chất vật lí, hoá học, sinh học của thành phần môi trường không phù hợp với quy chuẩn kĩ thuật môi trường, tiêu chuẩn môi trường gây ảnh hưởng xấu đến sức khỏe con người, sinh vật và tự nhiên".',
+	                options: ['Bảo vệ môi trường', 'Ô nhiễm môi trường', 'An ninh môi trường', 'Biến đổi khí hậu'],
+	                answer: 'Ô nhiễm môi trường'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Vấn đề nào dưới đây <b>không</b> liên quan đến an ninh môi trường?',
+	                options: ['Thiên tai', 'Dịch bệnh', 'Di cư tự do', 'An ninh thông tin'],
+	                answer: 'An ninh thông tin'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Hiện tượng nào sau đây <b>không</b> gây ô nhiễm môi trường:',
+	                options: ['Khí thải công nghiệp, rác thải sinh hoạt', 'Nước thải công nghiệp, khí thải của các loại xe', 'Tiếng ồn của các loại động cơ', 'Trồng rau sạch, sử dụng phân vi sinh'],
+	                answer: 'Trồng rau sạch, sử dụng phân vi sinh'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Nguyên nhân cơ bản nào sau đây dẫn đến ô nhiễm nguồn nước?',
+	                options: ['Nước thải không được xử lí', 'Khí thải của các phương tiện giao thông', 'Tiếng ồn của các loại động cơ', 'Động đất'],
+	                answer: 'Nước thải không được xử lí'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Dãy nào sau đây gồm các nguyên nhân gây ô nhiễm không khí mà bạn biết?',
+	                options: ['Khói bụi, trồng cây xanh, rác thải', 'Khói bụi, cháy rừng, rác thải', 'Cháy rừng, phun nước rửa đường, thu gom rác', 'Không sử dụng bếp than tổ ong, thu gom rác, khói bụi'],
+	                answer: 'Khói bụi, cháy rừng, rác thải'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Thuật ngữ nào được đề cập đến trong đoạn trích sau đây: "……. là hoạt động phòng ngừa, hạn chế tác động xấu đến môi trường; ứng phó sự cố môi trường; khắc phục ô nhiễm, suy thoái môi trường, cải thiện chất lượng môi trường; sử dụng hợp lí tài nguyên thiên nhiên, đa dạng sinh học và ứng phó với biến đổi khí hậu"',
+	                options: ['Suy thoái môi trường', 'An ninh môi trường', 'Bảo vệ môi trường', 'Sự cố môi trường'],
+	                answer: 'Bảo vệ môi trường'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Theo hướng dẫn kỹ thuật phân loại rác tại nguồn của Bộ Tài nguyên và Môi trường, chất thải rắn sinh hoạt được phân làm **mấy loại**?',
+	                options: ['3 loại gồm: chất thải tái chế, chất thải thực phẩm và chất thải khác', '4 loại gồm: chất thải tái chế, chất thải thực phẩm, chất thải nguy hại và chất thải khác', '2 loại gồm: chất thải tái chế và chất thải không tái chế'],
+	                answer: '3 loại gồm: chất thải tái chế, chất thải thực phẩm và chất thải khác'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Theo khuyến cáo của Bộ Y tế, vào những ngày môi trường không khí bị ô nhiễm ở mức đỏ cần làm gì?',
+	                options: [
+	                    'Hạn chế hoạt động ngoài trời, hạn chế mở cửa sổ, cửa ra vào thời điểm không khí bị ô nhiễm nặng, đặc biệt các gia đình gần đường giao thông, gần khu vực bị ô nhiễm không khí',
+	                    'Vệ sinh mũi, súc họng sáng tối bằng nước muối sinh lý, đặc biệt sau khi ra đường. Rửa mắt bằng nước muối sinh lý vào buổi tối trước khi đi ngủ',
+                        'Đeo khẩu trang khi ra ngoài',
+	                    'Tất cả các biện pháp trên'
+	                ],
+	                answer: 'Tất cả các biện pháp trên'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Ngày Môi trường thế giới hàng năm tổ chức vào ngày nào?',	                
+                    options: ['Ngày 4/6', 'Ngày 5/6', 'Ngày 6/6', 'Ngày 7/6'],
+	                answer: 'Ngày 5/6'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Chủ đề của Ngày Môi trường Thế giới năm 2023 là gì?',
+	                options: ['Phục hồi hệ sinh thái', 'Chỉ một trái đất', 'Giải pháp cho ô nhiễm nhựa', 'Phục hồi đất, sa mạc hóa và chống chịu hạn hán'],
+	                answer: 'Giải pháp cho ô nhiễm nhựa'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Hoạt động chính trong sự kiện Giờ Trái Đất là gì?',
+	                options: ['Tắt đèn và các thiết bị điện không cần thiết trong một giờ đồng hồ', 'Tổ chức nhặt rác, dọn dẹp vệ sinh môi trường sống', 'Tổ chức các hoạt động trồng cây', 'Tổ chức hoạt động đổi giấy vụn lấy cây xanh'],
+	                answer: 'Tắt đèn và các thiết bị điện không cần thiết trong một giờ đồng hồ'
+	            },
+	            {
+	                type: 'multiple',
+	                question: 'Các hoạt động chính trong Chiến dịch làm cho thế giới sạch hơn tại Việt Nam gồm:',
+	                options: ['Ra quân làm vệ sinh môi trường', 'Tổ chức các hoạt động trồng cây', 'Đẩy mạnh công tác tuyên truyền, phổ biến, giáo dục nhằm nâng cao ý thức, trách nhiệm của người dân, cộng đồng trong việc bảo vệ, giữ gìn, đảm bảo vệ sinh môi trường', 'Tất cả các hoạt động trên'],
+	                answer: 'Tất cả các hoạt động trên'
+	            }
+	        ];
+
+        let state = {
+            currentQuestion: 0,
+            showingAnswer: false,
+            teams: [
+                { name: 'Nhóm 1', score: 0 },
+                { name: 'Nhóm 2', score: 0 },
+                { name: 'Nhóm 3', score: 0 },
+                { name: 'Nhóm 4', score: 0 }
+            ],
+            chosenTeam: null,
+            gameStarted: false
+        };
+
+        function renderTeams() {
+            const teamsHtml = state.teams.map((team, index) => `
+                <div class="team-card" ondblclick="editTeamName(${index})">
+                    <div class="team-name">${team.name}</div>
+                    <div class="team-score">${team.score}</div>
+                </div>
+            `).join('');
+            document.getElementById('teams').innerHTML = teamsHtml;
+        }
+
+        function editTeamName(index) {
+            const newName = prompt('Nhập tên mới cho nhóm:', state.teams[index].name);
+            if (newName !== null && newName.trim() !== '') {
+                state.teams[index].name = newName.trim();
+                renderTeams();
+                updateTeamChoices();
+            }
+        }
+
+        function updateTeamChoices() {
+            const choices = document.querySelectorAll('.team-choice');
+            choices.forEach((choice, index) => {
+                choice.textContent = state.teams[index].name;
+            });
+        }
+
+        function startGame() {
+            state.gameStarted = true;
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('question').classList.add('show');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const question = questions[state.currentQuestion];
+            if (!question) {
+                renderFinishScreen();
+                return;
+            }
+
+            document.getElementById('question').innerHTML = `
+                <div class="question-number">Câu ${state.currentQuestion + 1}</div>
+                <div class="question-text">${question.question}</div>
+                <div class="answers-grid">
+                    ${question.options.map((option) => `
+                        <div class="answer-option" onclick="checkAnswer('${option}')">${option}</div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function checkAnswer(selectedOption) {
+            const correctAnswer = questions[state.currentQuestion].answer.trim().toLowerCase();
+
+            if (selectedOption.toLowerCase() === correctAnswer) {
+                document.getElementById('chooseTeamContainer').classList.add('show');
+            } else {
+                alert("Sai rồi! Vui lòng chọn lại.");
+            }
+        }
+
+        function moveToNextQuestion() {
+            state.currentQuestion++;
+            state.showingAnswer = false;
+            document.getElementById('chooseTeamContainer').classList.remove('show');
+            renderQuestion();
+        }
+
+        function chooseTeam(index) {
+            state.teams[index].score++;
+            renderTeams();
+            moveToNextQuestion();
+        }
+
+        function skipQuestion() {
+            moveToNextQuestion();
+        }
+
+        function renderFinishScreen() {
+            const highestScore = Math.max(...state.teams.map(team => team.score));
+            const winners = state.teams.filter(team => team.score === highestScore);
+
+            if (winners.length === 1) {
+                document.getElementById('question').innerHTML = `
+                    <div class="finish-screen">
+                        <div class="winner">🏆 ${winners[0].name} chiến thắng! 🏆</div>
+                        <div class="question-text">
+                            với ${winners[0].score} điểm<br><br>
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('question').innerHTML = `
+                    <div class="finish-screen">
+                        <div class="draw">Trò chơi kết thúc với kết quả hòa!</div>
+                        <div class="question-text">
+                            ${winners.map(team => `${team.name}: ${team.score} điểm`).join('<br>')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        renderTeams();
+        updateTeamChoices();
+    </script>
+</body>
+</html>
