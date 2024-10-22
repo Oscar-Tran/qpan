@@ -201,7 +201,7 @@
 
         .team-choices-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem; /* Gap lớn hơn */
             margin-bottom: 1.5rem;
         }
@@ -277,7 +277,6 @@
             <div class="team-choice" onclick="chooseTeam(0)">Nhóm 1</div>
             <div class="team-choice" onclick="chooseTeam(1)">Nhóm 2</div>
             <div class="team-choice" onclick="chooseTeam(2)">Nhóm 3</div>
-            <div class="team-choice" onclick="chooseTeam(3)">Nhóm 4</div>
         </div>
         <button class="skip-button" onclick="skipQuestion()">Bỏ qua</button>
     </div>
@@ -369,8 +368,7 @@
             teams: [
                 { name: 'Nhóm 1', score: 0 },
                 { name: 'Nhóm 2', score: 0 },
-                { name: 'Nhóm 3', score: 0 },
-                { name: 'Nhóm 4', score: 0 }
+                { name: 'Nhóm 3', score: 0 }
             ],
             chosenTeam: null,
             gameStarted: false
